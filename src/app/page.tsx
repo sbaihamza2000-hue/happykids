@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
 import {
-  Menu,
-  X,
-  ShoppingCart,
-  Plus,
-  Minus,
-  Trash2,
+  useEffect,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+  type ReactNode,
+} from 'react';
+import {
   Phone,
   MapPin,
   Mail,
@@ -24,7 +24,6 @@ import {
   ArrowRight,
   Send,
   Quote,
-  PartyPopper,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -38,85 +37,25 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetFooter,
-  SheetDescription,
-} from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
 import {
   useToast,
 } from '@/hooks/use-toast';
-import { useCartStore, type CartItem } from '@/store/cart';
 import { useScrollAnimation } from '@/hooks/use-scroll-animation';
-import { useMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+import { Navbar } from '@/components/site/navbar';
+import { Footer } from '@/components/site/footer';
+import { CartSidebar } from '@/components/site/cart-sidebar';
+import { WhatsAppButton } from '@/components/site/whatsapp-button';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel';
 
 /* ──────────── Data ──────────── */
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  unit: string;
-  image: string;
-}
-
-const products: Product[] = [
-  {
-    id: 'chocolate-cookies',
-    name: 'Cookies Chocolat',
-    description: 'Nos célèbres cookies aux pépites de chocolat fondant',
-    price: 8.0,
-    unit: 'Boîte de 6',
-    image: '/images/chocolate-cookies.png',
-  },
-  {
-    id: 'cookies-assorted',
-    name: 'Cookies Assortis',
-    description: 'Un mélange délicieux de nos meilleurs cookies artisanaux',
-    price: 15.0,
-    unit: 'Boîte de 12',
-    image: '/images/cookies-assorted.png',
-  },
-  {
-    id: 'tunisian-pastries',
-    name: 'Pâtisseries Tunisiennes',
-    description: 'Baklawa, Makroudh et Kaak Warka faits maison',
-    price: 20.0,
-    unit: 'Assortiment',
-    image: '/images/tunisian-pastries.png',
-  },
-  {
-    id: 'sugar-cookies',
-    name: 'Cookies Décorés',
-    description: 'Cookies colorés décorés à la main, parfaits pour les fêtes',
-    price: 12.0,
-    unit: 'Boîte de 8',
-    image: '/images/sugar-cookies.png',
-  },
-  {
-    id: 'butter-cookies',
-    name: 'Cookies Beurre',
-    description: 'Cookies au beurre fondant avec amandes torréfiées',
-    price: 10.0,
-    unit: 'Boîte de 8',
-    image: '/images/butter-cookies.png',
-  },
-  {
-    id: 'gift-box',
-    name: 'Coffret Cadeau',
-    description:
-      'Le coffret cadeau parfait avec assortiment de nos spécialités',
-    price: 35.0,
-    unit: 'Grand coffret',
-    image: '/images/gift-box.png',
-  },
-];
 
 const testimonials = [
   {
@@ -137,14 +76,6 @@ const testimonials = [
     text: "Des produits de qualité exceptionnelle ! Les cookies décorés étaient magnifiques pour la fête de mon fils. Merci Happy Kids pour cette merveilleuse expérience.",
     rating: 5,
   },
-];
-
-const navLinks = [
-  { href: '#accueil', label: 'Accueil' },
-  { href: '#produits', label: 'Nos Produits' },
-  { href: '#about', label: 'À Propos' },
-  { href: '#offres', label: 'Offres Spéciales' },
-  { href: '#contact', label: 'Contact' },
 ];
 
 const features = [
@@ -213,7 +144,7 @@ function AnimatedSection({
   className,
   id,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
   id?: string;
 }) {
@@ -232,115 +163,6 @@ function AnimatedSection({
     >
       {children}
     </section>
-  );
-}
-
-/* ──────────── Navbar ──────────── */
-
-function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const { totalItems, setIsOpen } = useCartStore();
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const itemCount = totalItems();
-
-  return (
-    <nav
-      className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
-        scrolled
-          ? 'bg-white/95 backdrop-blur-md shadow-md'
-          : 'bg-transparent'
-      )}
-    >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between md:h-20">
-          {/* Logo */}
-          <a href="#accueil" className="flex items-center gap-2">
-            <img
-              src="/images/logo.png"
-              alt="Happy Kids"
-              className="h-10 w-10 md:h-12 md:w-12 rounded-full"
-            />
-            <span
-              className="text-xl font-bold md:text-2xl text-dark-brown"
-              style={{ fontFamily: 'var(--font-fredoka)' }}
-            >
-              Happy Kids
-            </span>
-          </a>
-
-          {/* Desktop Nav Links */}
-          <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="text-sm font-semibold text-dark-brown hover:text-warm-orange transition-colors"
-              >
-                {link.label}
-              </a>
-            ))}
-          </div>
-
-          {/* Right side buttons */}
-          <div className="flex items-center gap-3">
-            {/* Cart button */}
-            <Button
-              variant="outline"
-              size="icon"
-              className="relative border-golden bg-white hover:bg-cream text-dark-brown"
-              onClick={() => setIsOpen(true)}
-            >
-              <ShoppingCart className="h-5 w-5" />
-              {itemCount > 0 && (
-                <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-warm-orange text-xs font-bold text-white animate-bounce-in">
-                  {itemCount}
-                </span>
-              )}
-            </Button>
-
-            {/* Mobile menu toggle */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden text-dark-brown hover:bg-cream"
-              onClick={() => setMobileOpen(!mobileOpen)}
-            >
-              {mobileOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Menu */}
-      {mobileOpen && (
-        <div className="md:hidden bg-white/95 backdrop-blur-md border-t border-golden/20 animate-fade-in-up">
-          <div className="px-4 py-4 space-y-1">
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="block px-4 py-3 rounded-lg text-dark-brown font-semibold hover:bg-cream transition-colors"
-                onClick={() => setMobileOpen(false)}
-              >
-                {link.label}
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
-    </nav>
   );
 }
 
@@ -393,7 +215,7 @@ function HeroSection() {
             size="lg"
             className="bg-warm-orange hover:bg-warm-orange/90 text-white font-bold text-lg px-8 py-6 rounded-full shadow-lg hover:shadow-xl transition-all"
           >
-            <a href="#produits">
+            <a href="/products">
               <Sparkles className="mr-2 h-5 w-5" />
               Découvrir nos produits
             </a>
@@ -405,7 +227,7 @@ function HeroSection() {
             className="border-2 border-white text-white hover:bg-white hover:text-dark-brown font-bold text-lg px-8 py-6 rounded-full bg-white/10 backdrop-blur-sm transition-all"
           >
             <a
-              href="https://wa.me/216XXXXXXXX?text=Bonjour%20Happy%20Kids%20!%20Je%20souhaite%20passer%20une%20commande."
+              href="https://wa.me/21628886302?text=Bonjour%20Happy%20Kids%20!%20Je%20souhaite%20passer%20une%20commande."
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -503,124 +325,65 @@ function AboutSection() {
   );
 }
 
-/* ──────────── Products Section ──────────── */
-
-function ProductCard({ product }: { product: Product }) {
-  const { addItem } = useCartStore();
-  const { toast } = useToast();
-  const [justAdded, setJustAdded] = useState(false);
-
-  const handleAddToCart = () => {
-    addItem({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
-    });
-    setJustAdded(true);
-    toast({
-      title: 'Ajouté au panier !',
-      description: `${product.name} a été ajouté à votre panier.`,
-      className:
-        'bg-white border-golden text-dark-brown',
-    });
-    setTimeout(() => setJustAdded(false), 1000);
-  };
-
-  return (
-    <Card className="group overflow-hidden border-none shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white">
-      {/* Image */}
-      <div className="relative aspect-square overflow-hidden bg-cream">
-        <img
-          src={product.image}
-          alt={product.name}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-        />
-        <div className="absolute top-3 right-3">
-          <Badge className="bg-warm-orange text-white font-bold shadow-md">
-            {product.price.toFixed(2)} TND
-          </Badge>
-        </div>
-      </div>
-
-      {/* Content */}
-      <CardHeader className="pb-2 pt-4">
-        <CardTitle
-          className="text-lg font-bold text-dark-brown"
-          style={{ fontFamily: 'var(--font-fredoka)' }}
-        >
-          {product.name}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pb-2">
-        <p className="text-muted-foreground text-sm leading-relaxed mb-2">
-          {product.description}
-        </p>
-        <p className="text-xs font-medium text-golden-dark">{product.unit}</p>
-      </CardContent>
-      <CardFooter className="pb-4">
-        <Button
-          onClick={handleAddToCart}
-          className={cn(
-            'w-full font-bold rounded-full transition-all duration-300',
-            justAdded
-              ? 'bg-green-500 hover:bg-green-500 text-white'
-              : 'bg-warm-orange hover:bg-warm-orange/90 text-white hover:shadow-lg'
-          )}
-        >
-          {justAdded ? (
-            <>
-              <PartyPopper className="mr-2 h-4 w-4" />
-              Ajouté !
-            </>
-          ) : (
-            <>
-              <ShoppingCart className="mr-2 h-4 w-4" />
-              Ajouter au panier
-            </>
-          )}
-        </Button>
-      </CardFooter>
-    </Card>
-  );
-}
-
-function ProductsSection() {
-  return (
-    <AnimatedSection id="produits" className="py-20 md:py-28 bg-cream">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="text-center mb-16">
-          <Badge className="mb-4 bg-pink/20 text-pink border-pink/30 px-4 py-1 text-sm font-semibold">
-            <Cookie className="mr-1 h-3 w-3" />
-            Nos Spécialités
-          </Badge>
-          <h2
-            className="text-3xl font-bold text-dark-brown sm:text-4xl md:text-5xl mb-6"
-            style={{ fontFamily: 'var(--font-fredoka)' }}
-          >
-            Nos Produits
-          </h2>
-          <p className="mx-auto max-w-2xl text-muted-foreground text-lg">
-            Découvrez notre sélection de cookies artisanaux et pâtisseries
-            tunisiennes, préparés avec amour et des ingrédients naturels.
-          </p>
-        </div>
-
-        {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      </div>
-    </AnimatedSection>
-  );
-}
-
 /* ──────────── Special Offers Section ──────────── */
 
 function OffersSection() {
+  const [offers, setOffers] = useState<
+    Array<{
+      id: string
+      name: string
+      price: number
+      originalPrice: number | null
+      image: string
+    }>
+  >([])
+  const [loaded, setLoaded] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadOffers() {
+      try {
+        const response = await fetch('/api/products', { cache: 'no-store' })
+        if (!response.ok) return
+        const data: unknown = await response.json()
+        if (
+          typeof data === 'object' &&
+          data !== null &&
+          'products' in data &&
+          Array.isArray((data as { products: unknown }).products)
+        ) {
+          const products = (data as { products: Array<Record<string, unknown>> }).products
+          const mapped = products
+            .filter((p) => p && p.onOffer === true)
+            .map((p) => ({
+              id: String(p.id ?? ''),
+              name: String(p.name ?? ''),
+              price: typeof p.price === 'number' ? p.price : Number(p.price ?? 0),
+              originalPrice:
+                typeof p.originalPrice === 'number'
+                  ? p.originalPrice
+                  : p.originalPrice === null
+                    ? null
+                    : null,
+              image: String(p.image ?? ''),
+            }))
+            .filter((p) => p.id && p.name && Number.isFinite(p.price) && p.image)
+
+          if (!cancelled) setOffers(mapped)
+        }
+      } catch {
+      } finally {
+        if (!cancelled) setLoaded(true)
+      }
+    }
+
+    loadOffers()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   return (
     <AnimatedSection id="offres" className="py-20 md:py-28 bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -628,7 +391,7 @@ function OffersSection() {
         <div className="text-center mb-12">
           <Badge className="mb-4 bg-yellow/20 text-yellow border-yellow/30 px-4 py-1 text-sm font-semibold">
             <Gift className="mr-1 h-3 w-3" />
-            Offre Limitée
+            Offres en cours
           </Badge>
           <h2
             className="text-3xl font-bold text-dark-brown sm:text-4xl md:text-5xl mb-6"
@@ -638,68 +401,145 @@ function OffersSection() {
           </h2>
         </div>
 
-        {/* Offer Card */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-warm-orange to-golden p-1 shadow-2xl">
-          <div className="rounded-[22px] bg-gradient-to-r from-warm-orange/90 to-golden/90 p-6 md:p-12">
-            <div className="flex flex-col md:flex-row items-center gap-8">
-              {/* Text */}
-              <div className="flex-1 text-center md:text-left">
-                <div className="inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 mb-4 animate-pulse-glow">
-                  <Badge className="bg-white text-warm-orange font-extrabold text-base px-4 py-1">
-                    -29% ÉCONOMIE
-                  </Badge>
-                </div>
-                <h3
-                  className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4"
-                  style={{ fontFamily: 'var(--font-fredoka)' }}
-                >
-                  Pack Économique Familial
-                </h3>
-                <p className="text-white/90 text-lg mb-6 max-w-lg">
-                  5 types de douceurs pour seulement{' '}
-                  <span className="font-bold text-2xl">25.00 TND</span>{' '}
-                  <span className="line-through text-white/60 text-lg">
-                    35.00 TND
-                  </span>
-                </p>
-                <p className="text-white/80 mb-8 text-sm">
-                  Inclut : Cookies Chocolat, Cookies Beurre, Cookies Décorés,
-                  Pâtisseries Tunisiennes et une surprise bonus !
-                </p>
-                <Button
-                  asChild
-                  size="lg"
-                  className="bg-white text-warm-orange hover:bg-cream font-bold text-lg px-8 py-6 rounded-full shadow-lg hover:shadow-xl transition-all"
-                >
-                  <a
-                    href="https://wa.me/216XXXXXXXX?text=Bonjour%20!%20Je%20suis%20intéressé(e)%20par%20le%20Pack%20Économique%20Familial%20à%2025%20TND."
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <ArrowRight className="mr-2 h-5 w-5" />
-                    Profiter de l&apos;offre
-                  </a>
-                </Button>
-              </div>
+        {offers.length > 0 ? (
+          <div className="relative">
+            {offers.length > 1 ? (
+              <Carousel opts={{ loop: true }} className="px-12">
+                <CarouselContent>
+                  {offers.map((p) => {
+                    const hasOriginal =
+                      typeof p.originalPrice === 'number' &&
+                      Number.isFinite(p.originalPrice) &&
+                      p.originalPrice > p.price
+                    const percent =
+                      hasOriginal && p.originalPrice
+                        ? Math.round((1 - p.price / p.originalPrice) * 100)
+                        : null
 
-              {/* Image */}
-              <div className="flex-shrink-0">
-                <div className="relative">
-                  <div className="h-48 w-48 md:h-64 md:w-64 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden">
-                    <img
-                      src="/images/cookies-assorted.png"
-                      alt="Pack Famille"
-                      className="h-40 w-40 md:h-56 md:w-56 object-cover rounded-full"
-                    />
-                  </div>
-                  <div className="absolute -top-2 -right-2 h-12 w-12 rounded-full bg-yellow flex items-center justify-center shadow-lg animate-bounce">
-                    <Gift className="h-6 w-6 text-dark-brown" />
-                  </div>
-                </div>
+                    return (
+                      <CarouselItem key={p.id} className="md:basis-1/2 lg:basis-1/3">
+                        <Card className="border-none shadow-lg bg-white overflow-hidden">
+                          <div className="relative aspect-square overflow-hidden bg-cream">
+                            <img
+                              src={p.image}
+                              alt={p.name}
+                              onError={(e) => {
+                                e.currentTarget.src = '/images/logo.png'
+                              }}
+                              className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+                            />
+                            <div className="absolute top-3 left-3">
+                              <Badge className="bg-warm-orange text-white font-bold shadow-md">
+                                {percent ? `-${percent}%` : 'Promo'}
+                              </Badge>
+                            </div>
+                          </div>
+                          <CardHeader className="pb-2 pt-4">
+                            <CardTitle
+                              className="text-lg font-bold text-dark-brown"
+                              style={{ fontFamily: 'var(--font-fredoka)' }}
+                            >
+                              {p.name}
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="pb-4">
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-xl font-bold text-warm-orange">
+                                {p.price.toFixed(2)} TND
+                              </span>
+                              {hasOriginal ? (
+                                <span className="text-sm text-muted-foreground line-through">
+                                  {p.originalPrice!.toFixed(2)} TND
+                                </span>
+                              ) : null}
+                            </div>
+                          </CardContent>
+                          <CardFooter className="pb-5">
+                            <Button asChild className="w-full font-bold rounded-full">
+                              <a href={`/products/${encodeURIComponent(p.id)}`}>
+                                Voir détails
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                              </a>
+                            </Button>
+                          </CardFooter>
+                        </Card>
+                      </CarouselItem>
+                    )
+                  })}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+              </Carousel>
+            ) : (
+              <div className="mx-auto max-w-3xl">
+                {offers.map((p) => {
+                  const hasOriginal =
+                    typeof p.originalPrice === 'number' &&
+                    Number.isFinite(p.originalPrice) &&
+                    p.originalPrice > p.price
+                  const percent =
+                    hasOriginal && p.originalPrice
+                      ? Math.round((1 - p.price / p.originalPrice) * 100)
+                      : null
+
+                  return (
+                    <Card key={p.id} className="border-none shadow-lg bg-white overflow-hidden">
+                      <div className="grid grid-cols-1 md:grid-cols-2">
+                        <div className="relative aspect-square bg-cream">
+                          <img
+                            src={p.image}
+                            alt={p.name}
+                            onError={(e) => {
+                              e.currentTarget.src = '/images/logo.png'
+                            }}
+                            className="h-full w-full object-cover"
+                          />
+                          <div className="absolute top-3 left-3">
+                            <Badge className="bg-warm-orange text-white font-bold shadow-md">
+                              {percent ? `-${percent}%` : 'Promo'}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="p-6 flex flex-col justify-between">
+                          <div>
+                            <h3
+                              className="text-2xl font-bold text-dark-brown"
+                              style={{ fontFamily: 'var(--font-fredoka)' }}
+                            >
+                              {p.name}
+                            </h3>
+                            <div className="mt-4 flex items-baseline gap-2">
+                              <span className="text-2xl font-bold text-warm-orange">
+                                {p.price.toFixed(2)} TND
+                              </span>
+                              {hasOriginal ? (
+                                <span className="text-sm text-muted-foreground line-through">
+                                  {p.originalPrice!.toFixed(2)} TND
+                                </span>
+                              ) : null}
+                            </div>
+                          </div>
+                          <Button asChild size="lg" className="mt-6 w-full font-bold rounded-full">
+                            <a href={`/products/${encodeURIComponent(p.id)}`}>
+                              Voir détails
+                              <ArrowRight className="ml-2 h-5 w-5" />
+                            </a>
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  )
+                })}
               </div>
-            </div>
+            )}
           </div>
-        </div>
+        ) : loaded ? (
+          <div className="text-center text-muted-foreground">
+            Aucune offre pour le moment.
+          </div>
+        ) : (
+          <div className="text-center text-muted-foreground">Chargement...</div>
+        )}
       </div>
     </AnimatedSection>
   );
@@ -727,7 +567,7 @@ function TestimonialsSection() {
 
         {/* Testimonials Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-          {testimonials.map((testimonial, index) => (
+          {testimonials.map((testimonial) => (
             <AnimatedSection key={testimonial.name}>
               <Card className="h-full border-none shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white group">
                 <CardContent className="pt-8 pb-6 px-6">
@@ -773,12 +613,12 @@ function ContactSection() {
   });
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -868,7 +708,7 @@ function ContactSection() {
                 </a>
 
                 <a
-                  href="https://wa.me/216XXXXXXXX?text=Bonjour%20Happy%20Kids%20!"
+                  href="https://wa.me/21628886302?text=Bonjour%20Happy%20Kids%20!"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-4 p-4 rounded-xl bg-cream hover:bg-green-50 transition-colors group"
@@ -879,7 +719,7 @@ function ContactSection() {
                   <div>
                     <p className="font-semibold text-dark-brown">WhatsApp</p>
                     <p className="text-sm text-muted-foreground">
-                      +216 XX XXX XXX
+                      +216 28 886 302
                     </p>
                   </div>
                 </a>
@@ -891,7 +731,7 @@ function ContactSection() {
                   <div>
                     <p className="font-semibold text-dark-brown">Téléphone</p>
                     <p className="text-sm text-muted-foreground">
-                      +216 XX XXX XXX
+                      +216 28 886 302 / +216 26 906 333
                     </p>
                   </div>
                 </div>
@@ -902,7 +742,9 @@ function ContactSection() {
                   </div>
                   <div>
                     <p className="font-semibold text-dark-brown">Location</p>
-                    <p className="text-sm text-muted-foreground">Tunisie</p>
+                    <p className="text-sm text-muted-foreground">
+                      Zone industrielle Souassi, Mahdia, 5140 Tunisie
+                    </p>
                   </div>
                 </div>
               </div>
@@ -959,7 +801,7 @@ function ContactSection() {
                     type="tel"
                     value={formData.phone}
                     onChange={handleChange}
-                    placeholder="+216 XX XXX XXX"
+                    placeholder="+216 22 222 222"
                     className="bg-white border-golden/30 focus:border-warm-orange focus:ring-warm-orange/20"
                   />
                 </div>
@@ -1004,278 +846,6 @@ function ContactSection() {
   );
 }
 
-/* ──────────── Cart Sidebar ──────────── */
-
-function CartSidebar() {
-  const {
-    items,
-    isOpen,
-    setIsOpen,
-    removeItem,
-    updateQuantity,
-    clearCart,
-    totalItems,
-    totalPrice,
-  } = useCartStore();
-
-  const itemCount = totalItems();
-  const total = totalPrice();
-
-  const handleWhatsApp = () => {
-    const itemsText = items
-      .map((item: CartItem) => `- ${item.name} x${item.quantity} (${(item.price * item.quantity).toFixed(2)} TND)`)
-      .join('\n');
-    const message = `Bonjour Happy Kids ! Je souhaite commander :\n\n${itemsText}\n\nTotal : ${total.toFixed(2)} TND`;
-    window.open(
-      `https://wa.me/216XXXXXXXX?text=${encodeURIComponent(message)}`,
-      '_blank'
-    );
-  };
-
-  return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetContent
-        side="right"
-        className="w-full sm:max-w-md bg-cream border-golden/20"
-      >
-        <SheetHeader className="pb-4">
-          <SheetTitle
-            className="text-xl font-bold text-dark-brown flex items-center gap-2"
-            style={{ fontFamily: 'var(--font-fredoka)' }}
-          >
-            <ShoppingCart className="h-5 w-5 text-warm-orange" />
-            Mon Panier
-            {itemCount > 0 && (
-              <Badge className="bg-warm-orange text-white ml-2">
-                {itemCount} article{itemCount > 1 ? 's' : ''}
-              </Badge>
-            )}
-          </SheetTitle>
-          <SheetDescription className="text-muted-foreground">
-            Vos douceurs sélectionnées
-          </SheetDescription>
-        </SheetHeader>
-
-        <div className="flex-1 overflow-y-auto max-h-[60vh]">
-          {items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Cookie className="h-16 w-16 text-golden/30 mb-4" />
-              <p className="text-muted-foreground font-medium">
-                Votre panier est vide
-              </p>
-              <p className="text-sm text-muted-foreground/70 mt-1">
-                Ajoutez des délicieux cookies !
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {items.map((item: CartItem) => (
-                <div
-                  key={item.id}
-                  className="flex gap-3 rounded-xl bg-white p-3 shadow-sm"
-                >
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="h-16 w-16 rounded-lg object-cover"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-dark-brown text-sm truncate">
-                      {item.name}
-                    </p>
-                    <p className="text-warm-orange font-bold text-sm">
-                      {item.price.toFixed(2)} TND
-                    </p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-7 w-7 border-golden/30 hover:bg-cream"
-                        onClick={() =>
-                          updateQuantity(item.id, item.quantity - 1)
-                        }
-                      >
-                        <Minus className="h-3 w-3" />
-                      </Button>
-                      <span className="text-sm font-semibold w-6 text-center">
-                        {item.quantity}
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-7 w-7 border-golden/30 hover:bg-cream"
-                        onClick={() =>
-                          updateQuantity(item.id, item.quantity + 1)
-                        }
-                      >
-                        <Plus className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end justify-between">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 text-red-400 hover:text-red-500 hover:bg-red-50"
-                      onClick={() => removeItem(item.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                    <p className="text-sm font-bold text-dark-brown">
-                      {(item.price * item.quantity).toFixed(2)} TND
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {items.length > 0 && (
-          <SheetFooter className="border-t border-golden/20 pt-4 space-y-3">
-            <div className="flex items-center justify-between w-full">
-              <span className="text-muted-foreground font-medium">Total</span>
-              <span
-                className="text-2xl font-bold text-dark-brown"
-                style={{ fontFamily: 'var(--font-fredoka)' }}
-              >
-                {total.toFixed(2)} TND
-              </span>
-            </div>
-            <Button
-              onClick={handleWhatsApp}
-              className="w-full bg-green-500 hover:bg-green-500/90 text-white font-bold rounded-full py-5 text-base"
-            >
-              <MessageCircle className="mr-2 h-5 w-5" />
-              Commander via WhatsApp
-            </Button>
-            <Button
-              variant="outline"
-              onClick={clearCart}
-              className="w-full border-golden/30 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-full"
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Vider le panier
-            </Button>
-          </SheetFooter>
-        )}
-      </SheetContent>
-    </Sheet>
-  );
-}
-
-/* ──────────── Footer ──────────── */
-
-function Footer() {
-  return (
-    <footer className="bg-dark-brown text-white">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-          {/* Brand */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <img
-                src="/images/logo.png"
-                alt="Happy Kids"
-                className="h-12 w-12 rounded-full border-2 border-golden"
-              />
-              <span
-                className="text-2xl font-bold"
-                style={{ fontFamily: 'var(--font-fredoka)' }}
-              >
-                Happy Kids
-              </span>
-            </div>
-            <p className="text-white/60 leading-relaxed text-sm">
-              Fabrique artisanale de cookies et pâtisseries tunisiennes. Des
-              douceurs faites avec amour pour les petits et les grands.
-            </p>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h4 className="font-bold text-lg mb-4 text-golden">
-              Liens Rapides
-            </h4>
-            <div className="space-y-2">
-              {navLinks.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  className="block text-white/60 hover:text-golden transition-colors text-sm"
-                >
-                  {link.label}
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* Social & Contact */}
-          <div>
-            <h4 className="font-bold text-lg mb-4 text-golden">
-              Suivez-nous
-            </h4>
-            <div className="flex gap-3">
-              <a
-                href="https://www.facebook.com/people/Happy-Kids/100092726604069/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 hover:bg-blue-600 text-white transition-all hover:scale-110"
-              >
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a
-                href="https://wa.me/216XXXXXXXX"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 hover:bg-green-500 text-white transition-all hover:scale-110"
-              >
-                <MessageCircle className="h-5 w-5" />
-              </a>
-            </div>
-            <div className="mt-6 space-y-2 text-sm text-white/60">
-              <p className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-golden" />
-                +216 XX XXX XXX
-              </p>
-              <p className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-golden" />
-                Tunisie
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <Separator className="my-8 bg-white/10" />
-
-        <div className="text-center text-sm text-white/40">
-          <p>&copy; 2025 Happy Kids - Tous droits réservés</p>
-        </div>
-      </div>
-    </footer>
-  );
-}
-
-/* ──────────── WhatsApp Floating Button ──────────── */
-
-function WhatsAppButton() {
-  return (
-    <a
-      href="https://wa.me/216XXXXXXXX?text=Bonjour%20Happy%20Kids%20!%20Je%20souhaite%20avoir%20des%20informations%20sur%20vos%20produits."
-      target="_blank"
-      rel="noopener noreferrer"
-      className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-green-500 text-white shadow-lg hover:bg-green-500/90 hover:shadow-xl transition-all animate-float group"
-      aria-label="Contacter via WhatsApp"
-    >
-      <MessageCircle className="h-7 w-7 group-hover:scale-110 transition-transform" />
-      <span className="absolute -top-1 -right-1 flex h-4 w-4">
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
-        <span className="relative inline-flex h-4 w-4 rounded-full bg-green-500"></span>
-      </span>
-    </a>
-  );
-}
-
 /* ──────────── Main Page ──────────── */
 
 export default function Home() {
@@ -1285,7 +855,6 @@ export default function Home() {
       <main className="flex-1">
         <HeroSection />
         <AboutSection />
-        <ProductsSection />
         <OffersSection />
         <TestimonialsSection />
         <ContactSection />

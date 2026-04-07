@@ -14,14 +14,6 @@ export async function POST(request: Request) {
     }
 
     // In a production app, you would send an email or save to database here
-    // For now, we just log and return success
-    console.log('Contact form submission:', {
-      name,
-      email,
-      phone,
-      message,
-      timestamp: new Date().toISOString(),
-    });
 
     return NextResponse.json({
       success: true,

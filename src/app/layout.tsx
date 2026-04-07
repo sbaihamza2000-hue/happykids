@@ -29,7 +29,10 @@ export const metadata: Metadata = {
     "Tunisie",
   ],
   icons: {
-    icon: "/images/logo.png",
+    icon: [
+      { url: "/images/logo.jpg" },
+      { url: "/images/logo.png" },
+    ],
   },
   openGraph: {
     title: "Happy Kids - Douceurs Artisanales",
