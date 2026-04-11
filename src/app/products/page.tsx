@@ -15,6 +15,7 @@ type Product = {
   name: string
   description: string
   ingredients?: string | null
+  sizes?: string[]
   price: number
   onOffer?: boolean
   originalPrice?: number | null
@@ -116,7 +117,7 @@ export default function ProductsPage() {
               </CardHeader>
               <CardContent className="pb-2">
                 <p className="text-muted-foreground text-sm leading-relaxed mb-2">
-                  {product.description}
+                  {product.ingredients ?? 'À définir'}
                 </p>
                 <p className="text-xs font-medium text-golden-dark">{product.unit}</p>
                 <div className="mt-3 flex items-baseline gap-2">

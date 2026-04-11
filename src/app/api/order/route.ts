@@ -69,6 +69,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 })
     }
 
+    const allowedSizes = Array.isArray(product.sizes) ? product.sizes : []
+    if (allowedSizes.length > 0 && !allowedSizes.includes(size)) {
+      return NextResponse.json(
+        { error: 'Size not available for this product' },
+        { status: 400 }
+      )
+    }
+
     const order = await db.order.create({
       data: {
         customerName: customerName.trim(),

@@ -39,6 +39,9 @@ export async function PATCH(
     const data: {
       name?: string
       description?: string
+      ingredients?: string | null
+      sizes?: string[]
+      image?: string
       price?: number
       onOffer?: boolean
       originalPrice?: number | null
@@ -58,6 +61,30 @@ export async function PATCH(
         return NextResponse.json({ error: 'Invalid description' }, { status: 400 })
       }
       data.description = v.trim()
+    }
+
+    if ('ingredients' in body) {
+      const v = (body as { ingredients: unknown }).ingredients
+      if (v !== null && typeof v !== 'string') {
+        return NextResponse.json({ error: 'Invalid ingredients' }, { status: 400 })
+      }
+      data.ingredients = (v as string | null) ?? null
+    }
+
+    if ('sizes' in body) {
+      const v = (body as { sizes: unknown }).sizes
+      if (!Array.isArray(v)) {
+        return NextResponse.json({ error: 'Invalid sizes' }, { status: 400 })
+      }
+      data.sizes = v.map(String).filter(Boolean)
+    }
+
+    if ('image' in body) {
+      const v = (body as { image: unknown }).image
+      if (typeof v !== 'string' || !v.trim()) {
+        return NextResponse.json({ error: 'Invalid image' }, { status: 400 })
+      }
+      data.image = v.trim()
     }
 
     if ('price' in body) {
@@ -107,10 +134,12 @@ export async function PATCH(
       select: {
         id: true,
         name: true,
-        description: true,
         price: true,
         onOffer: true,
         originalPrice: true,
+        image: true,
+        ingredients: true,
+        sizes: true,
       },
     })
 

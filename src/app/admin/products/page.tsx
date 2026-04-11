@@ -18,6 +18,7 @@ type Product = {
   name: string
   description: string
   ingredients?: string | null
+  sizes?: string[]
   price: number
   onOffer: boolean
   originalPrice?: number | null
@@ -34,7 +35,8 @@ export default function AdminProductsPage() {
   const [creating, setCreating] = useState(false)
   const [adminPassword, setAdminPassword] = useState('')
   const [newName, setNewName] = useState('')
-  const [newDescription, setNewDescription] = useState('')
+  const [newIngredients, setNewIngredients] = useState('')
+  const [newSizes, setNewSizes] = useState<string[]>([])
   const [newPrice, setNewPrice] = useState<string>('')
   const [newImage, setNewImage] = useState<string>('')
   const [newFile, setNewFile] = useState<File | null>(null)
@@ -56,8 +58,10 @@ export default function AdminProductsPage() {
             .map((p) => ({
               ...p,
               onOffer: typeof p.onOffer === 'boolean' ? p.onOffer : false,
-              originalPrice:
-                typeof p.originalPrice === 'number' ? p.originalPrice : null,
+              originalPrice: typeof p.originalPrice === 'number' ? p.originalPrice : null,
+              sizes: Array.isArray((p as { sizes?: unknown }).sizes)
+                ? (p as { sizes: unknown[] }).sizes.map(String).filter(Boolean)
+                : [],
             }))
         )
       }
@@ -203,13 +207,13 @@ export default function AdminProductsPage() {
     }
 
     const name = newName.trim()
-    const description = newDescription.trim()
+    const ingredients = newIngredients.trim()
     const price = Number(String(newPrice).trim())
 
-    if (!description || !Number.isFinite(price) || price < 0) {
+    if (!ingredients || !Number.isFinite(price) || price < 0) {
       toast({
         title: 'Champs requis',
-        description: 'Description et prix sont obligatoires.',
+        description: 'Ingrédients et prix sont obligatoires.',
       })
       return
     }
@@ -242,7 +246,8 @@ export default function AdminProductsPage() {
         },
         body: JSON.stringify({
           name: name || 'Nouveau produit',
-          description,
+          ingredients,
+          sizes: newSizes,
           price,
           image,
         }),
@@ -262,7 +267,8 @@ export default function AdminProductsPage() {
       }
 
       setNewName('')
-      setNewDescription('')
+      setNewIngredients('')
+      setNewSizes([])
       setNewPrice('')
       setNewImage('')
       setNewFile(null)
@@ -295,11 +301,12 @@ export default function AdminProductsPage() {
         },
         body: JSON.stringify({
           name: p.name,
-          description: p.description,
+          ingredients: p.ingredients ?? null,
+          sizes: p.sizes ?? [],
+          image: p.image,
           price: p.price,
           onOffer: p.onOffer,
           originalPrice: p.onOffer ? p.originalPrice ?? null : null,
-          image: p.image,
         }),
       })
       if (!res.ok) throw new Error('failed')
@@ -441,14 +448,38 @@ export default function AdminProductsPage() {
                     />
                   </div>
                   <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="new-description">Description *</Label>
+                    <Label htmlFor="new-ingredients">Ingrédients *</Label>
                     <Textarea
-                      id="new-description"
-                      value={newDescription}
-                      onChange={(e) => setNewDescription(e.target.value)}
-                      placeholder="Description du produit"
+                      id="new-ingredients"
+                      value={newIngredients}
+                      onChange={(e) => setNewIngredients(e.target.value)}
+                      placeholder="Ex: beurre, chocolat, ..."
                       rows={3}
                     />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label>Tailles disponibles</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {['1.5kg', '2.5kg', '3kg', '5kg', 'pack-3', 'pack-5'].map((s) => (
+                        <Button
+                          key={s}
+                          type="button"
+                          variant={newSizes.includes(s) ? 'default' : 'outline'}
+                          className="rounded-full"
+                          onClick={() =>
+                            setNewSizes((curr) =>
+                              curr.includes(s) ? curr.filter((x) => x !== s) : [...curr, s]
+                            )
+                          }
+                        >
+                          {s === 'pack-3'
+                            ? 'Pack 3 boîtes (830g)'
+                            : s === 'pack-5'
+                              ? 'Pack 5 boîtes (500g)'
+                              : s}
+                        </Button>
+                      ))}
+                    </div>
                   </div>
                   <div className="space-y-2 md:col-span-2">
                     <Label htmlFor="new-image">Image (URL)</Label>
@@ -603,14 +634,39 @@ export default function AdminProductsPage() {
                             />
                           </div>
                           <div className="space-y-1 sm:col-span-2">
-                            <Label htmlFor={`desc-${p.id}`}>Description</Label>
+                            <Label htmlFor={`ing-${p.id}`}>Ingrédients</Label>
                             <Textarea
-                              id={`desc-${p.id}`}
-                              value={p.description}
-                              onChange={(e) => updateLocalProduct(p.id, { description: e.target.value })}
+                              id={`ing-${p.id}`}
+                              value={p.ingredients ?? ''}
+                              onChange={(e) => updateLocalProduct(p.id, { ingredients: e.target.value })}
                               rows={3}
                               disabled={!adminPassword.trim()}
                             />
+                          </div>
+                          <div className="space-y-1 sm:col-span-2">
+                            <Label>Tailles disponibles</Label>
+                            <div className="flex flex-wrap gap-2">
+                              {['1.5kg', '2.5kg', '3kg', '5kg', 'pack-3', 'pack-5'].map((s) => (
+                                <Button
+                                  key={s}
+                                  type="button"
+                                  variant={p.sizes?.includes(s) ? 'default' : 'outline'}
+                                  className="rounded-full"
+                                  onClick={() => {
+                                    const next = new Set(p.sizes ?? [])
+                                    next.has(s) ? next.delete(s) : next.add(s)
+                                    updateLocalProduct(p.id, { sizes: Array.from(next) })
+                                  }}
+                                  disabled={!adminPassword.trim()}
+                                >
+                                  {s === 'pack-3'
+                                    ? 'Pack 3 boîtes (830g)'
+                                    : s === 'pack-5'
+                                      ? 'Pack 5 boîtes (500g)'
+                                      : s}
+                                </Button>
+                              ))}
+                            </div>
                           </div>
                         </div>
 

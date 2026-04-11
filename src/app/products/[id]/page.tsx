@@ -95,9 +95,9 @@ export default function ProductDetailPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-10 md:py-16">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:items-start">
         <div className="rounded-3xl overflow-hidden bg-white shadow-lg">
-          <div className="bg-cream">
+          <div className="relative bg-cream">
             <img
               src={product.image}
               alt={product.name}

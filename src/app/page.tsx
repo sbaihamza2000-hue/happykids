@@ -177,7 +177,7 @@ function HeroSection() {
       {/* Background */}
       <div className="absolute inset-0 z-0">
         <img
-          src="/images/hero-banner.png"
+          src="https://res.cloudinary.com/dd9s1ry6j/image/upload/v1775902360/vecteezy_delicious-assorted-cookies-stacked-high-creating-temptation_72219466_dzbnlq.jpg"
           alt="Happy Kids Cookies"
           className="h-full w-full object-cover"
         />
