@@ -8,6 +8,7 @@
     "start": "node -e \"process.env.NODE_ENV='production'; require('./.next/standalone/server.js')\"",
     "lint": "npx eslint .",
     "typecheck": "tsc --noEmit",
+    "postinstall": "prisma generate",
     "db:push": "prisma db push && prisma generate",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev && prisma generate",

@@ -14,25 +14,27 @@ type SizeOption = {
   minBoxes: number
 }
 
-const sizeOptions: SizeOption[] = [
-  { value: '500g', label: '500g', minBoxes: 5 },
-  { value: '800g', label: '800g', minBoxes: 3 },
-  { value: '1.5kg', label: '1.5kg', minBoxes: 1 },
-  { value: '2.5kg', label: '2.5kg', minBoxes: 1 },
-]
+function toOptions(sizes?: string[]): SizeOption[] {
+  const label = (s: string) => (s === 'pack-3' ? 'Pack 3 boîtes (830g)' : s === 'pack-5' ? 'Pack 5 boîtes (500g)' : s)
+  const base = (sizes && sizes.length > 0 ? sizes : ['1.5kg','2.5kg','3kg','5kg','pack-3','pack-5'])
+  return base.map((v) => ({ value: v, label: label(v), minBoxes: 1 }))
+}
 
 export function ProductOrderForm({
   productId,
   productName,
+  sizes,
   disabled = false,
 }: {
   productId: string
   productName: string
+  sizes?: string[]
   disabled?: boolean
 }) {
   const { toast } = useToast()
-  const [size, setSize] = useState<SizeOption>(sizeOptions[0])
-  const [boxes, setBoxes] = useState<number>(sizeOptions[0].minBoxes)
+  const options = useMemo(() => toOptions(sizes), [sizes])
+  const [size, setSize] = useState<SizeOption>(toOptions(sizes)[0])
+  const [boxes, setBoxes] = useState<number>(toOptions(sizes)[0].minBoxes)
   const [customerName, setCustomerName] = useState('')
   const [phone, setPhone] = useState('')
   const [location, setLocation] = useState('')
@@ -100,8 +102,8 @@ export function ProductOrderForm({
       setCustomerName('')
       setPhone('')
       setLocation('')
-      setSize(sizeOptions[0])
-      setBoxes(sizeOptions[0].minBoxes)
+      setSize(options[0])
+      setBoxes(options[0].minBoxes)
     } catch {
       toast({
         title: 'Erreur',
@@ -126,7 +128,7 @@ export function ProductOrderForm({
         <div className="space-y-2">
           <Label className="text-dark-brown font-semibold">Taille</Label>
           <div className="flex flex-wrap gap-2">
-            {sizeOptions.map((opt) => (
+            {options.map((opt) => (
               <Button
                 key={opt.value}
                 type="button"

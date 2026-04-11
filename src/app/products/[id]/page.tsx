@@ -17,6 +17,7 @@ type Product = {
   originalPrice?: number | null
   unit: string
   image: string
+  sizes?: string[]
   available: boolean
 }
 
@@ -96,14 +97,14 @@ export default function ProductDetailPage() {
     <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-10 md:py-16">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="rounded-3xl overflow-hidden bg-white shadow-lg">
-          <div className="relative aspect-square bg-cream">
+          <div className="bg-cream">
             <img
               src={product.image}
               alt={product.name}
               onError={(e) => {
                 e.currentTarget.src = '/images/logo.png'
               }}
-              className="h-full w-full object-cover"
+              className="w-full h-auto object-contain"
             />
             <div className="absolute top-4 left-4">
               <Badge
@@ -127,9 +128,6 @@ export default function ProductDetailPage() {
             >
               {product.name}
             </h1>
-            <p className="mt-3 text-muted-foreground leading-relaxed">
-              {product.description}
-            </p>
             <div className="mt-4 flex items-baseline gap-3">
               {product.onOffer && product.originalPrice ? (
                 <>
@@ -170,6 +168,7 @@ export default function ProductDetailPage() {
           <ProductOrderForm
             productId={product.id}
             productName={product.name}
+            sizes={product.sizes}
             disabled={!product.available}
           />
         </div>
