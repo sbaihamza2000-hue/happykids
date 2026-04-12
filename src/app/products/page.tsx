@@ -86,7 +86,11 @@ export default function ProductsPage() {
               key={product.id}
               className="group overflow-hidden border-none shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white"
             >
-              <div className="relative aspect-square overflow-hidden bg-cream">
+              <a
+                href={`/products/${encodeURIComponent(product.id)}`}
+                aria-label={`Voir détails: ${product.name}`}
+                className="relative aspect-square overflow-hidden bg-cream block"
+              >
                 <img
                   src={product.image}
                   alt={product.name}
@@ -105,7 +109,7 @@ export default function ProductsPage() {
                     {product.available ? 'Disponible' : 'Indisponible'}
                   </Badge>
                 </div>
-              </div>
+              </a>
 
               <CardHeader className="pb-2 pt-4">
                 <CardTitle
@@ -116,10 +120,32 @@ export default function ProductsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="pb-2">
-                <p className="text-muted-foreground text-sm leading-relaxed mb-2">
-                  {product.ingredients ?? 'À définir'}
-                </p>
-                <p className="text-xs font-medium text-golden-dark">{product.unit}</p>
+                {(() => {
+                  const ingredientsText = (product.ingredients ?? '').trim()
+                  const cleaned = ingredientsText
+                    .split(/[,\n]/g)
+                    .map((s) => s.trim())
+                    .filter((s) => {
+                      if (!s) return false
+                      const n = s.toLowerCase()
+                      return n !== 'à définir' && n !== 'a definire'
+                    })
+                    .join(', ')
+                  const missing = cleaned.length === 0
+                  return (
+                    <p className="text-muted-foreground text-sm leading-relaxed mb-2">
+                      {missing ? 'À définir' : cleaned}
+                    </p>
+                  )
+                })()}
+                {(() => {
+                  const unitText = (product.unit ?? '').trim()
+                  const normalized = unitText.toLowerCase()
+                  const show = unitText.length > 0 && normalized !== 'à définir' && normalized !== 'a definire'
+                  return show ? (
+                    <p className="text-xs font-medium text-golden-dark">{unitText}</p>
+                  ) : null
+                })()}
                 <div className="mt-3 flex items-baseline gap-2">
                   {product.onOffer && product.originalPrice ? (
                     <>

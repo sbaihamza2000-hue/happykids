@@ -60,10 +60,17 @@ export default function ProductDetailPage() {
   }, [id])
 
   const ingredients = useMemo(() => {
-    return (product?.ingredients ?? '')
+    const raw = (product?.ingredients ?? '').trim()
+    const normalized = raw.toLowerCase()
+    if (raw.length === 0 || normalized === 'à définir' || normalized === 'a definire') return []
+    return raw
       .split(',')
       .map((s) => s.trim())
-      .filter(Boolean)
+      .filter((s) => {
+        if (!s) return false
+        const n = s.toLowerCase()
+        return n !== 'à définir' && n !== 'a definire'
+      })
   }, [product?.ingredients])
 
 
@@ -146,7 +153,12 @@ export default function ProductDetailPage() {
               )}
             </div>
             <p className="mt-2 text-sm font-medium text-golden-dark">
-              {product.unit}
+              {(() => {
+                const unitText = (product.unit ?? '').trim()
+                const normalized = unitText.toLowerCase()
+                const hide = unitText.length === 0 || normalized === 'à définir' || normalized === 'a definire'
+                return hide ? null : unitText
+              })()}
             </p>
           </div>
 

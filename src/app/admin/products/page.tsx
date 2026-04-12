@@ -654,7 +654,11 @@ export default function AdminProductsPage() {
                                   className="rounded-full"
                                   onClick={() => {
                                     const next = new Set(p.sizes ?? [])
-                                    next.has(s) ? next.delete(s) : next.add(s)
+                                    if (next.has(s)) {
+                                      next.delete(s)
+                                    } else {
+                                      next.add(s)
+                                    }
                                     updateLocalProduct(p.id, { sizes: Array.from(next) })
                                   }}
                                   disabled={!adminPassword.trim()}

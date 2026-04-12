@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Nunito, Fredoka } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import { Analytics } from "@vercel/analytics/next"
 
 const nunito = Nunito({
   variable: "--font-nunito",
