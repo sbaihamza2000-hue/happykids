@@ -460,7 +460,7 @@ export default function AdminProductsPage() {
                   <div className="space-y-2 md:col-span-2">
                     <Label>Tailles disponibles</Label>
                     <div className="flex flex-wrap gap-2">
-                      {['1.5kg', '2,250kg','2.5kg', '3kg', '5kg', 'pack-3', 'pack-5'].map((s) => (
+                      {['1.25kg', '1.5kg', '2.25kg', '2.5kg', '3kg', '5kg', 'pack-3', 'pack-5'].map((s) => (
                         <Button
                           key={s}
                           type="button"
@@ -646,7 +646,7 @@ export default function AdminProductsPage() {
                           <div className="space-y-1 sm:col-span-2">
                             <Label>Tailles disponibles</Label>
                             <div className="flex flex-wrap gap-2">
-                              {['1.5kg', '2.5kg', '3kg', '5kg', 'pack-3', 'pack-5'].map((s) => (
+                              {['1.25kg', '1.5kg', '2.25kg', '2.5kg', '3kg', '5kg', 'pack-3', 'pack-5'].map((s) => (
                                 <Button
                                   key={s}
                                   type="button"

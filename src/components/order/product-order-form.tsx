@@ -16,7 +16,7 @@ type SizeOption = {
 
 function toOptions(sizes?: string[]): SizeOption[] {
   const label = (s: string) => (s === 'pack-3' ? 'Pack 3 boîtes (830g)' : s === 'pack-5' ? 'Pack 5 boîtes (500g)' : s)
-  const base = (sizes && sizes.length > 0 ? sizes : ['1.5kg','2.5kg','3kg','5kg','pack-3','pack-5'])
+  const base = (sizes && sizes.length > 0 ? sizes : ['1.25kg', '1.5kg', '2.25kg', '2.5kg', '3kg', '5kg', 'pack-3', 'pack-5'])
   return base.map((v) => ({ value: v, label: label(v), minBoxes: 1 }))
 }
 
